@@ -54,9 +54,13 @@ enum class TimeUnits(
     HOUR("час", "часа", "часов"),
     DAY("день", "дня", "дней");
 
-    fun plural(amount: Int) = when (amount) {
-        1 -> "1 $single"
-        in 2..4 -> "$amount $several"
-        else -> "$amount $many"
+    fun plural(amount: Int) = "$amount ${units(amount)}"
+
+    private fun units(amount: Int): String = when(amount) {
+        0, in 5..19 -> "$many"
+        1 -> "$single"
+        in 2..4 -> "$several"
+        in 20..99 -> units(amount % 10)
+        else -> units(amount % 100)
     }
 }
