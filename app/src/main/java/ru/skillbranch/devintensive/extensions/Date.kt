@@ -8,7 +8,7 @@ const val MINUTE: Long = 60 * SECOND
 const val HOUR: Long = 60 * MINUTE
 const val DAY: Long = 24 * HOUR
 
-fun Date.plural(pattern: String = "HH:mm:ss dd.MM.yy"): String =
+fun Date.format(pattern: String = "HH:mm:ss dd.MM.yy"): String =
     SimpleDateFormat(pattern, Locale("ru")).format(this)
 
 fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND) = this.also {
