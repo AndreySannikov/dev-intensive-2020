@@ -23,11 +23,11 @@ fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND) = this.also {
 fun Date.humanizeDiff(that: Date = Date()) = (time - that.time).let {
     when {
         it < -360 * DAY     -> "более года назад"
-        it < -26 * HOUR     -> "${ TimeUnits.DAY.plural(-it / DAY) } назад"
+        it < -26 * HOUR     -> "${ TimeUnits.DAY.plural((-it / DAY).toInt()) } назад"
         it < -22 * HOUR     -> "день назад"
-        it < -75 * MINUTE   -> "${ TimeUnits.HOUR.plural(-it / HOUR) } назад"
+        it < -75 * MINUTE   -> "${ TimeUnits.HOUR.plural((-it / HOUR).toInt()) } назад"
         it < -45 * MINUTE   -> "час назад"
-        it < -75 * SECOND   -> "${ TimeUnits.MINUTE.plural(-it / MINUTE) } назад"
+        it < -75 * SECOND   -> "${ TimeUnits.MINUTE.plural((-it / MINUTE).toInt()) } назад"
         it < -45 * SECOND   -> "минуту назад"
         it < -1 * SECOND    -> "несколько секунд назад"
 
@@ -35,45 +35,28 @@ fun Date.humanizeDiff(that: Date = Date()) = (time - that.time).let {
 
         it <= 45 * SECOND   -> "через несколько секунд"
         it <= 75 * SECOND   -> "через минуту"
-        it <= 45 * MINUTE   -> "через ${ TimeUnits.MINUTE.plural(it / MINUTE) }"
+        it <= 45 * MINUTE   -> "через ${ TimeUnits.MINUTE.plural((it / MINUTE).toInt()) }"
         it <= 75 * MINUTE   -> "через час"
-        it <= 22 * HOUR     -> "через ${ TimeUnits.HOUR.plural(it / HOUR) }"
+        it <= 22 * HOUR     -> "через ${ TimeUnits.HOUR.plural((it / HOUR).toInt()) }"
         it <= 26 * HOUR     -> "через день"
-        it <= 360 * DAY     -> "через ${ TimeUnits.DAY.plural(it / DAY) }"
+        it <= 360 * DAY     -> "через ${ TimeUnits.DAY.plural((it / DAY).toInt()) }"
         else                -> "более чем через год"
     }
-
 }
 
-enum class TimeUnits {
-    SECOND {
-        override fun plural(amount: Long) = when {
-            amount == 1L -> "1 секунду"
-            amount < 5  -> "$amount секунды"
-            else        -> "$amount секунд"
-        }
-    },
-    MINUTE {
-        override fun plural(amount: Long) = when {
-            amount == 1L -> "1 минуту"
-            amount < 5  -> "$amount минуты"
-            else        -> "$amount минут"
-        }
-    },
-    HOUR {
-        override fun plural(amount: Long) = when {
-            amount == 1L -> "1 час"
-            amount < 5  -> "$amount часа"
-            else        -> "$amount часов"
-        }
-    },
-    DAY {
-        override fun plural(amount: Long) = when {
-            amount == 1L -> "1 день"
-            amount < 5  -> "$amount дня"
-            else        -> "$amount дней"
-        }
-    };
+enum class TimeUnits(
+    private val single: String,
+    private val several: String,
+    private val many: String
+) {
+    SECOND("секунду", "секунды", "секунд"),
+    MINUTE("минуту", "минуты", "минут"),
+    HOUR("час", "часа", "часов"),
+    DAY("день", "дня", "дней");
 
-    abstract fun plural(amount: Long): String
+    fun plural(amount: Int) = when (amount) {
+        1 -> "1 $single"
+        in 2..4 -> "$amount $several"
+        else -> "$amount $many"
+    }
 }
