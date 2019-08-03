@@ -5,12 +5,10 @@ class Bender(var status: Status = Status.NORMAL, var question: Question = Questi
     fun askQuestion(): String = question.question
 
     fun listenAnswer(answer: String): Pair<String, Triple<Int, Int, Int>> = when {
-        question == Question.IDLE -> {
+        question == Question.IDLE ->
             Question.IDLE.question to status.color
-        }
-        !question.validate(answer) -> {
+        !question.validate(answer) ->
             "${question.validationMessage}\n${question.question}" to status.color
-        }
         question.answers.contains(answer.toLowerCase()) -> {
             question = question.nextQuestion()
             "Отлично - ты справился\n${question.question}" to status.color
