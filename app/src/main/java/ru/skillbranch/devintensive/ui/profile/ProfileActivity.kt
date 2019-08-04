@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputEditText
 import kotlinx.android.synthetic.main.activity_profile_contstraint.*
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.Profile
+import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.ProfileViewModel
 
 class ProfileActivity : AppCompatActivity() {
@@ -95,6 +96,7 @@ class ProfileActivity : AppCompatActivity() {
         profile.toMap().forEach{(k, v) ->
             viewFields[k]?.text = v.toString()
         }
+        updateAvatar(profile)
     }
 
     private fun updateTheme(mode: Int) {
@@ -128,6 +130,11 @@ class ProfileActivity : AppCompatActivity() {
             background.colorFilter = filter
             setImageDrawable(resources.getDrawable(icon, theme))
         }
+    }
+
+    private fun updateAvatar(profile: Profile){
+        val initials = Utils.toInitials(profile.firstName, profile.lastName)
+        iv_avatar.generateAvatar(initials, 48, theme)
     }
 
     private fun saveProfileInfo() {

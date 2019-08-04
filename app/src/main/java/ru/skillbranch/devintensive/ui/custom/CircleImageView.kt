@@ -15,6 +15,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import ru.skillbranch.devintensive.R
 import android.graphics.RectF
+import android.util.TypedValue
 import kotlin.math.min
 
 class CircleImageView @JvmOverloads constructor(
@@ -29,8 +30,9 @@ class CircleImageView @JvmOverloads constructor(
 
     private var borderColor = DEFAULT_BORDER_COLOR
     private var borderWidthDp = DEFAULT_BORDER_WIDTH_DP
+    private var text: String? = null
 
-
+    private var defaultBitmap: Bitmap? = null
     private var bitmap: Bitmap? = null
 
     private var paintBorder: Paint = Paint().apply { isAntiAlias = true }
@@ -45,6 +47,7 @@ class CircleImageView @JvmOverloads constructor(
             borderWidthDp = a.getDimensionPixelSize(R.styleable.CircleImageView_cv_borderWidth, DEFAULT_BORDER_WIDTH_DP)
             a.recycle()
         }
+
     }
 
     @Dimension(unit = DP)
@@ -68,7 +71,7 @@ class CircleImageView @JvmOverloads constructor(
         super.getScaleType().let { if (it == null || it != CENTER_INSIDE) CENTER_CROP else it }
 
     override fun onDraw(canvas: Canvas) {
-        loadBitmap(drawable)
+        bitmap = loadBitmap(drawable)
 
         if (bitmap == null) return
 
@@ -80,8 +83,53 @@ class CircleImageView @JvmOverloads constructor(
         canvas.drawCircle(rect.centerX(), rect.centerY(), innerCircleRadius, paint)
     }
 
-    private fun loadBitmap(drawable: Drawable?) {
-        bitmap = when (drawable) {
+    fun generateAvatar(text: String?, sizeSp: Int, theme: Resources.Theme) {
+        if (defaultBitmap == null) {
+            defaultBitmap = loadBitmap(drawable)
+        }
+        if (text != this.text){
+            val image = when(text) {
+                null -> defaultBitmap
+                else -> generateLetterAvatar(text, sizeSp, theme)
+            }
+
+            this.text = text
+            setImageBitmap(image)
+        }
+    }
+
+    private fun generateLetterAvatar(text: String, sizeSp: Int, theme: Resources.Theme): Bitmap {
+        return colored(R.attr.colorAccent, theme).apply {
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+            paint.textSize = spToPixels(sizeSp)
+            paint.color = Color.WHITE
+            paint.textAlign = Paint.Align.CENTER
+
+            val textBounds = Rect()
+            paint.getTextBounds(text, 0, text.length, textBounds)
+
+            val backgroundBounds = RectF()
+            backgroundBounds.set(0f, 0f, layoutParams.height.toFloat(), layoutParams.height.toFloat())
+
+            val textBottom = backgroundBounds.centerY() - textBounds.exactCenterY()
+            val canvas = Canvas(this)
+            canvas.drawText(text, backgroundBounds.centerX(), textBottom, paint)
+        }
+    }
+
+    private fun colored(colorId: Int, theme: Resources.Theme): Bitmap {
+        val image = Bitmap.createBitmap(layoutParams.height, layoutParams.height, Bitmap.Config.ARGB_8888)
+        val color = TypedValue()
+        theme.resolveAttribute(colorId, color, true)
+
+        val canvas = Canvas(image)
+        canvas.drawColor(color.data)
+
+        return image
+    }
+
+    private fun loadBitmap(drawable: Drawable?): Bitmap? =
+        when (drawable) {
             null -> null
             is BitmapDrawable -> drawable.bitmap
             else -> Bitmap.createBitmap(
@@ -93,9 +141,7 @@ class CircleImageView @JvmOverloads constructor(
                 drawable.setBounds(0, 0, canvas.width, canvas.height)
                 drawable.draw(canvas)
             }
-        }
-        updateShader()
-    }
+        }.also { updateShader() }
 
     private fun updateShader() {
         bitmap?.also {
@@ -158,7 +204,8 @@ class CircleImageView @JvmOverloads constructor(
     }
 
 
-    private fun widthInPixels(): Int = (borderWidthDp * Resources.getSystem().displayMetrics.density).toInt()
+    private fun widthInPixels() = borderWidthDp * Resources.getSystem().displayMetrics.density
+    private fun spToPixels(sp: Int)= sp * Resources.getSystem().displayMetrics.scaledDensity
 
 }
 
