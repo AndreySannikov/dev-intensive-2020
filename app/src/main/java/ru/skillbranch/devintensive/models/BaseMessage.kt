@@ -1,27 +1,18 @@
 package ru.skillbranch.devintensive.models
 
-import ru.skillbranch.devintensive.extensions.humanizeDiff
+import ru.skillbranch.devintensive.models.data.Chat
+import ru.skillbranch.devintensive.models.data.User
 import java.util.*
 
+/**
+ * Created by Makweb on 24.06.2019.
+ */
 abstract class BaseMessage(
     val id: String,
-    val from: User?,
+    val from: User,
     val chat: Chat,
-    val isIncoming: Boolean = false,
-    val date: Date = Date()
-) {
-    abstract fun formatMessage(): String
+    val isIncoming: Boolean = true,
+    val date: Date = Date(),
+    var isReaded: Boolean = false
 
-    protected fun doFormatMessage(msg: String) =
-        "${from?.firstName} ${if (isIncoming) "получил" else "отправил" } $msg ${date.humanizeDiff()}"
-
-    companion object AbstractFactory {
-        var id = 0
-
-        fun makeMessage(from: User?, chat: Chat, date: Date = Date(), type: String, payload: Any, isIncoming: Boolean = false): BaseMessage =
-            when (type) {
-                "image" -> ImageMessage("${id++}", from, chat, isIncoming, date, payload as String)
-                else -> TextMessage("${id++}", from, chat, date = date, text = payload as String)
-            }
-    }
-}
+)

@@ -2,6 +2,7 @@ package ru.skillbranch.devintensive.extensions
 
 import android.app.Activity
 import android.graphics.Rect
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 
@@ -25,3 +26,11 @@ private fun keyBoardHeight(activity: Activity): Int {
     rootView.getWindowVisibleDisplayFrame(visibleBounds)
     return rootView.height - visibleBounds.height()
 }
+
+fun Activity.convertDpToPx(dp: Float): Float = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    dp,
+    resources.displayMetrics
+)
+
+fun Activity.convertPxToDp(px: Float): Float = px / resources.displayMetrics.density

@@ -8,8 +8,15 @@ const val MINUTE: Long = 60 * SECOND
 const val HOUR: Long = 60 * MINUTE
 const val DAY: Long = 24 * HOUR
 
+val hourMinutesFmt = SimpleDateFormat("HH:mm", Locale("ru"))
+val dayOfYearFmt = SimpleDateFormat("dd.MM.yy", Locale("ru"))
+
 fun Date.format(pattern: String = "HH:mm:ss dd.MM.yy"): String =
     SimpleDateFormat(pattern, Locale("ru")).format(this)
+
+fun Date.shortFormat(): String = (if (isSameDay(Date())) hourMinutesFmt else dayOfYearFmt).format(this)
+
+fun Date.isSameDay(date: Date): Boolean = this.time / DAY == date.time / DAY
 
 fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND) = this.also {
     it.time += value * when (units) {
