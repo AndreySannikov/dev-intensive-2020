@@ -1,6 +1,9 @@
 package ru.skillbranch.devintensive.models.data
 
 import androidx.annotation.VisibleForTesting
+import ru.skillbranch.devintensive.App
+import ru.skillbranch.devintensive.R
+import ru.skillbranch.devintensive.data.managers.CacheManager
 import ru.skillbranch.devintensive.extensions.shortFormat
 import ru.skillbranch.devintensive.models.BaseMessage
 import ru.skillbranch.devintensive.models.ImageMessage
@@ -24,7 +27,8 @@ data class Chat(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun lastMessageShort(): Pair<String, String?> = when (val lastMessage = messages.lastOrNull()) {
-        is TextMessage -> (lastMessage.text ?: "Сообщений пока что нет") to lastMessage.from.firstName
+        is TextMessage -> (lastMessage.text
+            ?: "Сообщений пока что нет") to lastMessage.from.firstName
         is ImageMessage -> ("${lastMessage.from.firstName} - отправил фото") to lastMessage.from.firstName
         else -> "Сообщений пока что нет" to null
     }
@@ -61,6 +65,27 @@ data class Chat(
             )
         }
     }
+
+    companion object {
+        fun toArchiveChatItem(archiveChats: List<Chat>): ChatItem {
+            val chatsWithMessages = archiveChats.filter { it.messages.isNotEmpty() }
+            val chatWithLastMessage = chatsWithMessages.maxBy { it.lastMessageDate()!! }
+            val t = chatWithLastMessage?.lastMessageShort()
+
+            return ChatItem(
+                CacheManager.nextChatId(),
+                null,
+                "",
+                App.applicationContext().getString(R.string.archive_chats_title),
+                t?.first,
+                chatsWithMessages.sumBy { it.unreadableMessageCount() },
+                chatWithLastMessage?.lastMessageDate()?.shortFormat(),
+                chatType = ChatType.ARCHIVE,
+                author = t?.second
+            )
+        }
+    }
+
 }
 
 enum class ChatType {

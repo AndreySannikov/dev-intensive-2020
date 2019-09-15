@@ -15,6 +15,7 @@
             android:theme="@style/SplashTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ui.group.GroupActivity" />
+        <activity android:name=".ui.archive.ArchiveActivity" />
         <activity android:name=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

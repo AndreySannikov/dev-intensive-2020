@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_chat_archive.*
 import kotlinx.android.synthetic.main.item_chat_group.*
 import kotlinx.android.synthetic.main.item_chat_single.*
 import ru.skillbranch.devintensive.R
@@ -21,7 +22,7 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
     var items: List<ChatItem> = listOf()
 
     override fun getItemViewType(position: Int): Int = when (items[position].chatType) {
-        ChatType.ARCHIVE -> R.layout.item_chat_archieve
+        ChatType.ARCHIVE -> R.layout.item_chat_archive
         ChatType.SINGLE -> R.layout.item_chat_single
         ChatType.GROUP -> R.layout.item_chat_group
     }
@@ -33,7 +34,8 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
         return when (viewType) {
             R.layout.item_chat_single -> SingleViewHolder(view)
             R.layout.item_chat_group -> GroupViewHolder(view)
-            else -> GroupViewHolder(view)
+            R.layout.item_chat_archive -> ArchiveViewHolder(view)
+            else -> throw UnsupportedOperationException("viewType $viewType is not supported")
         }
     }
 
@@ -140,6 +142,27 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
 
         override fun onItemCleared() {
             itemView.setBackgroundColor(Color.WHITE)
+        }
+    }
+
+    inner class ArchiveViewHolder(listItemView: View) : ChatItemViewHolder(listItemView) {
+        override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
+            with(tv_date_archive) {
+                visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
+                text = item.lastMessageDate
+            }
+
+            with(tv_counter_archive) {
+                visibility = if (item.messageCount > 0) View.VISIBLE else View.GONE
+                text = item.messageCount.toString()
+            }
+            tv_message_archive.text = item.shortDescription
+            with(tv_message_author_archive) {
+                visibility = if (item.messageCount > 0) View.VISIBLE else View.GONE
+                text = item.author
+            }
+
+            itemView.setOnClickListener { listener.invoke(item) }
         }
     }
 

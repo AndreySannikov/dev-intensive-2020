@@ -9,4 +9,5 @@
     <string name="profile_error_repository_invalid">Невалидный адрес репозитория</string>
     <string name="menu_search">Поиск</string>
     <string name="archive_cancel">Cancel archiving</string>
+    <string name="archive_chats_title">Архив чатов</string>
 </resources>

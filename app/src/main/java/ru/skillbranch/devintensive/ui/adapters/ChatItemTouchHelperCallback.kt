@@ -71,17 +71,16 @@ class ChatItemTouchHelperCallback(
                 drawBackground(canvas, this, dX)
                 drawIcon(canvas, this, dX)
             }
-        } else {
-            super.onChildDraw(
-                canvas,
-                recyclerView,
-                viewHolder,
-                dX,
-                dY,
-                actionState,
-                isCurrentlyActive
-            )
         }
+        super.onChildDraw(
+            canvas,
+            recyclerView,
+            viewHolder,
+            dX,
+            dY,
+            actionState,
+            isCurrentlyActive
+        )
     }
 
     private fun drawBackground(canvas: Canvas, view: View, dX: Float) {
@@ -100,7 +99,7 @@ class ChatItemTouchHelperCallback(
     }
 
     private fun drawIcon(canvas: Canvas, view: View, dX: Float) {
-        val icon = view.resources.getDrawable(R.drawable.ic_archive_black_24dp, view.context.theme)
+        val icon = view.resources.getDrawable(R.drawable.ic_archive_white_24dp, view.context.theme)
         val iconSize = view.resources.getDimensionPixelSize(R.dimen.icon_size)
         val space = view.resources.getDimensionPixelSize(R.dimen.spacing_normal_16)
 
