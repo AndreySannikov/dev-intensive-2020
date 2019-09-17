@@ -7,14 +7,15 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_normal_16">
 
-    <ru.skillbranch.devintensive.ui.custom.CircleImageView
+    <ImageView
             android:id="@+id/iv_avatar_archive"
             android:layout_width="@dimen/avatar_item_size"
             android:layout_height="@dimen/avatar_item_size"
             android:layout_alignParentStart="true"
             android:layout_marginEnd="@dimen/spacing_normal_16"
             android:background="@drawable/btn_round_bg_archive"
-            android:padding="@dimen/spacing_small_8"
+            android:contentDescription="@string/avatar_archive_descr"
+            android:padding="8dp"
             android:src="@drawable/ic_archive_white_24dp" />
 
     <TextView

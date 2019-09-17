@@ -12,4 +12,5 @@
     <string name="archive_chats_title">Архив чатов</string>
     <string name="createGroupTitle">Создание группы</string>
     <string name="archiveTitle">Архив чатов</string>
+    <string name="avatar_archive_descr">Static Image For Archive Chats Item</string>
 </resources>
