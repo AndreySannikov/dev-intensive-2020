@@ -57,7 +57,7 @@ class UserAdapter(private val listener: (UserItem) -> Unit) :
                     .into(iv_avatar_user)
             } else {
                 Glide.with(itemView).clear(iv_avatar_user)
-                iv_avatar_user.setInitials(user.initials ?: "??")
+                iv_avatar_user.initials = user.initials
             }
 
             sv_indicator.visibility = if (user.isOnline) View.VISIBLE else View.GONE

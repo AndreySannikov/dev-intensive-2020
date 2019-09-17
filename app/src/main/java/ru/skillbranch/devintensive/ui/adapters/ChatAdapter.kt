@@ -82,7 +82,7 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
         override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
             if (item.avatar == null) {
                 Glide.with(itemView).clear(iv_avatar_single)
-                iv_avatar_single.setInitials(item.initials)
+                iv_avatar_single.initials = item.initials
             } else {
                 Glide.with(itemView)
                     .load(item.avatar)
@@ -116,7 +116,7 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
     inner class GroupViewHolder(listItemView: View) : ChatItemViewHolder(listItemView),
         ItemTouchViewHolder {
         override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
-            iv_avatar_group.setInitials(item.title[0].toString())
+            iv_avatar_group.initials = item.title[0].toString()
             with(tv_date_group) {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = item.lastMessageDate

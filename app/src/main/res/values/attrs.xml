@@ -11,6 +11,7 @@
     <declare-styleable name="AvatarImageView">
         <attr name="aiv_borderColor" format="color" />
         <attr name="aiv_borderWidth" format="dimension" />
+        <attr name="aiv_initialsSize" format="dimension"/>
     </declare-styleable>
 
     <attr name="colorAccentedSurface" format="reference" />

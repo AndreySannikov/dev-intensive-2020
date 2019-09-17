@@ -75,7 +75,7 @@ class ProfileActivity : AppCompatActivity() {
             viewModel.switchTheme()
         }
 
-        et_repository.addTextChangedListener(object : TextWatcher {
+        et_repository.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {}
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -85,8 +85,7 @@ class ProfileActivity : AppCompatActivity() {
                     wr_repository.isErrorEnabled = false
                     wr_repository.error = null
                 } else {
-                    wr_repository.error =
-                        resources.getString(R.string.profile_error_repository_invalid)
+                    wr_repository.error = resources.getString(R.string.profile_error_repository_invalid)
                 }
             }
         })
@@ -94,7 +93,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateUI(profile: Profile) {
-        profile.toMap().forEach { (k, v) ->
+        profile.toMap().forEach{(k, v) ->
             viewFields[k]?.text = v.toString()
         }
         updateAvatar(profile)
@@ -133,9 +132,9 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateAvatar(profile: Profile) {
+    private fun updateAvatar(profile: Profile){
         val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        iv_avatar.setText(initials)
+        iv_avatar.generateAvatar(initials, 48, theme)
     }
 
     private fun saveProfileInfo() {
