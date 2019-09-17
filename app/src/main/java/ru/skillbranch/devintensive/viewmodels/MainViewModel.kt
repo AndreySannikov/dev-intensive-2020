@@ -17,7 +17,7 @@ class MainViewModel : ViewModel() {
             .groupBy { it.isArchived }
     }
 
-    fun getChatData(): LiveData<List<ChatItem>> {
+    fun getActiveChatData(): LiveData<List<ChatItem>> {
         val result = MediatorLiveData<List<ChatItem>>()
 
         val filterF = {
@@ -29,13 +29,42 @@ class MainViewModel : ViewModel() {
                 ?: emptyList()
             val q = query.value!!
             val filtered =
-                if (q.isEmpty()) activeChatItems else activeChatItems.filter { it.title.contains(q, true) }
+                if (q.isEmpty()) activeChatItems else activeChatItems.filter {
+                    it.title.contains(
+                        q,
+                        true
+                    )
+                }
 
             result.value = if (archiveChatItem == null) {
                 filtered
             } else {
                 listOf(archiveChatItem).plus(filtered)
             }
+        }
+
+        result.addSource(chats) { filterF.invoke() }
+        result.addSource(query) { filterF.invoke() }
+        return result
+    }
+
+    fun getArchiveChatData(): LiveData<List<ChatItem>> {
+        val result = MediatorLiveData<List<ChatItem>>()
+
+        val filterF = {
+            val activeChatItems = chats.value!![true]
+                ?.map { it.toChatItem() }
+                ?.sortedBy { it.id.toInt() }
+                ?: emptyList()
+            val q = query.value!!
+
+            result.value =
+                if (q.isEmpty()) activeChatItems else activeChatItems.filter {
+                    it.title.contains(
+                        q,
+                        true
+                    )
+                }
         }
 
         result.addSource(chats) { filterF.invoke() }

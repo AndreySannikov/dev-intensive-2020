@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.R
+import ru.skillbranch.devintensive.extensions.snackBar
 import ru.skillbranch.devintensive.models.data.ChatType
 import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
 import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
@@ -58,22 +59,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         chatAdapter = ChatAdapter {
-//            Snackbar.make(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_LONG).show()
             if (it.chatType == ChatType.ARCHIVE) {
                 val intent = Intent(this, ArchiveActivity::class.java)
                 startActivity(intent)
+            } else {
+                snackBar(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_LONG).show()
             }
         }
 
         val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        val touchCallback = ChatItemTouchHelperCallback(chatAdapter) { chatItem ->
+        val archiveIcon = getDrawable(R.drawable.ic_archive_white_24dp)
+        val touchCallback = ChatItemTouchHelperCallback(chatAdapter, archiveIcon!!) { chatItem ->
             viewModel.addToArchive(chatItem.id)
-            Snackbar.make(
+            snackBar(
                 rv_chat_list,
                 "Вы точно хотите добавить ${chatItem.title} в архив?",
                 Snackbar.LENGTH_LONG
             )
-                .setAction(R.string.archive_cancel) { viewModel.restoreFromArchive(chatItem.id) }
+                .setAction(R.string.cancellation) { viewModel.restoreFromArchive(chatItem.id) }
                 .show()
             rv_chat_list.scrollToPosition(0)
         }
@@ -93,6 +96,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewModel() {
         viewModel = ViewModelProviders.of(this)[MainViewModel::class.java]
-        viewModel.getChatData().observe(this, Observer { chatAdapter.updateData(it) })
+        viewModel.getActiveChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 }

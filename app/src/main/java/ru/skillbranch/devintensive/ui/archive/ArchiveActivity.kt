@@ -1,34 +1,34 @@
 package ru.skillbranch.devintensive.ui.archive
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.children
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.chip.Chip
-import kotlinx.android.synthetic.main.activity_group.*
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_archive.*
+import kotlinx.android.synthetic.main.activity_archive.toolbar
+import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.R
-import ru.skillbranch.devintensive.models.data.UserItem
-import ru.skillbranch.devintensive.ui.adapters.UserAdapter
-import ru.skillbranch.devintensive.viewmodels.GroupViewModel
+import ru.skillbranch.devintensive.extensions.snackBar
+import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
+import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
+import ru.skillbranch.devintensive.viewmodels.MainViewModel
 
 class ArchiveActivity : AppCompatActivity() {
 
-    private lateinit var userAdapter: UserAdapter
-    private lateinit var viewModel: GroupViewModel
+    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_group)
-        initToolbar()
+        setContentView(R.layout.activity_archive)
+        initToolBar()
         initViews()
         initViewModel()
     }
@@ -62,76 +62,39 @@ class ArchiveActivity : AppCompatActivity() {
         }
     }
 
-    private fun initToolbar() {
+    private fun initToolBar() {
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun initViews() {
-        userAdapter = UserAdapter { viewModel.handleSelectedItem(it.id) }
-        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        chatAdapter = ChatAdapter {
+            snackBar(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_LONG).show()
+        }
 
-        with(rv_user_list) {
-            adapter = userAdapter
+        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        val unArchiveIcon = getDrawable(R.drawable.ic_unarchive_white_24dp)
+        val touchCallback = ChatItemTouchHelperCallback(chatAdapter, unArchiveIcon!!) { chatItem ->
+            viewModel.restoreFromArchive(chatItem.id)
+            snackBar(
+                rv_archive_list,
+                "Восстановить чат с ${chatItem.title} из архива?",
+                Snackbar.LENGTH_LONG
+            )
+                .setAction(R.string.cancellation) { viewModel.addToArchive(chatItem.id) }
+                .show()
+        }
+
+        with(rv_archive_list) {
+            ItemTouchHelper(touchCallback).attachToRecyclerView(this)
+            adapter = chatAdapter
             layoutManager = LinearLayoutManager(this@ArchiveActivity)
             addItemDecoration(divider)
         }
 
-        fab.setOnClickListener {
-            viewModel.handleCreateGroup()
-            finish()
-            overridePendingTransition(R.anim.idle, R.anim.bottom_down)
-        }
     }
 
     private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(GroupViewModel::class.java)
-        viewModel.getUsersData().observe(this, Observer { userAdapter.updateData(it) })
-        viewModel.getSelectedData().observe(this, Observer {
-            updateChips(it)
-            toggleFab(it.size > 1)
-        })
-    }
-
-    private fun toggleFab(isShow: Boolean) {
-        if (isShow) {
-            fab.show()
-        } else {
-            fab.hide()
-        }
-    }
-
-    private fun addChipToGroup(user: UserItem) {
-        val chip = Chip(this).apply {
-            text = user.fullName
-            chipIcon = resources.getDrawable(R.drawable.avatar_default, theme)
-            isCloseIconVisible = true
-            tag = user.id
-            isClickable = true
-            closeIconTint = ColorStateList.valueOf(Color.WHITE)
-            chipBackgroundColor = ColorStateList.valueOf(getColor(R.color.color_primary_light))
-            setTextColor(Color.WHITE)
-        }.apply {
-            setOnCloseIconClickListener { viewModel.handleRemoveChip(it.tag.toString()) }
-        }
-
-        chip_group.addView(chip)
-
-    }
-
-    private fun updateChips(users: List<UserItem>) {
-        chip_group.visibility = if (users.isEmpty()) View.GONE else View.VISIBLE
-
-        val chips = chip_group.children.associateBy { it.tag }
-
-        users.associateBy { it.id }.toMutableMap().apply {
-            chips.forEach {
-                if (!containsKey(it.key)) {
-                    chip_group.removeView(it.value)
-                } else {
-                    remove(it.key)
-                }
-            }
-        }.forEach { addChipToGroup(it.value) }
+        viewModel = ViewModelProviders.of(this)[MainViewModel::class.java]
+        viewModel.getArchiveChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 }

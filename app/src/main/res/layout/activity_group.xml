@@ -16,7 +16,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:title="@string/createGroupTitle" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -24,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="?attr/actionBarSize"
+            android:background="?attr/colorChipGroupBackground"
             android:orientation="vertical">
 
         <com.google.android.material.chip.ChipGroup
