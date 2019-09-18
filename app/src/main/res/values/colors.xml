@@ -29,4 +29,15 @@
     <color name="color_snackbar_text_night">#121212</color>
     <color name="color_chip_background_night">#1D1D1D</color>
     <color name="color_chip_group_background_night">#121212</color>
+
+    <color name="color_avatar1">#A695E7</color>
+    <color name="color_avatar2">#65AADD</color>
+    <color name="color_avatar3">#FAA774</color>
+    <color name="color_avatar4">#6EC9CB</color>
+    <color name="color_avatar5">#7BC862</color>
+    <color name="color_avatar6">#E17076</color>
+    <color name="color_avatar7">#AD366B</color>
+    <color name="color_avatar8">#00BFA5</color>
+    <color name="color_avatar9">#B746F0</color>
+    <color name="color_avatar10">#4D66F1</color>
 </resources>

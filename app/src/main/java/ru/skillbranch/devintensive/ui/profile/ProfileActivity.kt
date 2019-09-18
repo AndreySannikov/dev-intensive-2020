@@ -26,8 +26,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private lateinit var viewModel: ProfileViewModel
-    var isEditMode = false
-    lateinit var viewFields: Map<String, TextView>
+    private var isEditMode = false
+    private lateinit var viewFields: Map<String, TextView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
@@ -101,7 +101,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateTheme(mode: Int) {
         Log.d("M_ProfileActivity", "updateTheme")
-        delegate.setLocalNightMode(mode)
+        delegate.localNightMode = mode
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
@@ -134,7 +134,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateAvatar(profile: Profile){
         val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        iv_avatar.generateAvatar(initials, 48, theme)
+        iv_avatar.setImageBitmap(iv_avatar.drawDefaultAvatar(initials!!))
     }
 
     private fun saveProfileInfo() {
