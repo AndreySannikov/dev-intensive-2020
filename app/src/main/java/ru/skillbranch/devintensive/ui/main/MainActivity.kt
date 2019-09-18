@@ -96,6 +96,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewModel() {
         viewModel = ViewModelProviders.of(this)[MainViewModel::class.java]
-        viewModel.getActiveChatData().observe(this, Observer { chatAdapter.updateData(it) })
+        viewModel.getChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 }

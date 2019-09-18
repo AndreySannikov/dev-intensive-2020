@@ -1,12 +1,13 @@
 package ru.skillbranch.devintensive.ui.profile
 
-import android.graphics.ColorFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.content.Context
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.Profile
 import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.ProfileViewModel
+import kotlin.math.roundToInt
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -134,8 +136,32 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateAvatar(profile: Profile){
         val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        iv_avatar.setInitials(initials!!)
+        val bitmap = textAsBitmap(initials!!, 48f, Color.WHITE)
+        val drawable = BitmapDrawable(resources, bitmap)
+        iv_avatar.setImageDrawable(drawable)
     }
+
+    private fun textAsBitmap(text:String, textSize:Float, textColor:Int): Bitmap {
+        val dp = resources.displayMetrics.density.roundToInt()
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.textSize = textSize*dp
+        paint.color = textColor
+        paint.textAlign = Paint.Align.CENTER
+
+        val image = Bitmap.createBitmap(112*dp, 112*dp, Bitmap.Config.ARGB_8888)
+
+        image.eraseColor(getThemeAccentColor(this))
+        val canvas = Canvas(image)
+        canvas.drawText(text, 56f*dp, 56f*dp + paint.textSize/3, paint)
+        return image
+    }
+
+    private fun getThemeAccentColor(context: Context): Int {
+        val value = TypedValue()
+        context.theme.resolveAttribute(R.attr.colorAccent, value, true)
+        return value.data
+    }
+
 
     private fun saveProfileInfo() {
         Profile(

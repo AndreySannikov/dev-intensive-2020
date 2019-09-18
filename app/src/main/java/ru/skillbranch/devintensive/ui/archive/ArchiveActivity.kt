@@ -18,12 +18,12 @@ import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.extensions.snackBar
 import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
 import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
-import ru.skillbranch.devintensive.viewmodels.MainViewModel
+import ru.skillbranch.devintensive.viewmodels.ArchiveViewModel
 
 class ArchiveActivity : AppCompatActivity() {
 
     private lateinit var chatAdapter: ChatAdapter
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: ArchiveViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +94,7 @@ class ArchiveActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this)[MainViewModel::class.java]
-        viewModel.getArchiveChatData().observe(this, Observer { chatAdapter.updateData(it) })
+        viewModel = ViewModelProviders.of(this)[ArchiveViewModel::class.java]
+        viewModel.getChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 }

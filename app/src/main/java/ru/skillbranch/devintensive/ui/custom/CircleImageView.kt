@@ -1,16 +1,18 @@
 package ru.skillbranch.devintensive.ui.custom
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.widget.ImageView.ScaleType.CENTER_CROP
+import android.widget.ImageView.ScaleType.CENTER_INSIDE
 import androidx.annotation.ColorRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import ru.skillbranch.devintensive.R
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 open class CircleImageView @JvmOverloads constructor(
     context: Context,
@@ -23,80 +25,161 @@ open class CircleImageView @JvmOverloads constructor(
         private const val DEFAULT_BORDER_COLOR = Color.WHITE
     }
 
-    private val paintCircle: Paint = Paint().apply { isAntiAlias = true }
-    private val paintBitmap: Paint = Paint().apply {
-        isAntiAlias = true
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-    }
+    private val paint: Paint = Paint().apply { isAntiAlias = true }
     private val paintBorder: Paint = Paint().apply { isAntiAlias = true }
 
-    private var borderWidth = DEFAULT_BORDER_WIDTH.dp
+    private var circleCenter = 0f
+    private var heightCircle = 0
+
+    private var borderWidth = DEFAULT_BORDER_WIDTH * resources.displayMetrics.density
     private var borderColor = DEFAULT_BORDER_COLOR
 
-    private var civImage: Bitmap? = null
+    private var mbitmap: Bitmap? = null
 
     init {
-        val attributes =
-            context.obtainStyledAttributes(attrs, R.styleable.CircleImageView, defStyleAttr, 0)
-        borderWidth =
-            attributes.getDimension(R.styleable.CircleImageView_cv_borderWidth, borderWidth)
-        borderColor = attributes.getColor(R.styleable.CircleImageView_cv_borderColor, borderColor)
-        attributes.recycle()
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        civImage = drawableToBitmap(drawable) ?: return
-        val radius = min(width, height) / 2f
-
-        setLayerType(LAYER_TYPE_HARDWARE, paintCircle)
-        canvas.drawCircle(radius, radius, radius, paintCircle)
-        canvas.drawBitmap(civImage!!, 0f, 0f, paintBitmap)
-
-        if (borderWidth > 0) {
-            paintBorder.color = borderColor
-            paintBorder.strokeWidth = borderWidth
-            paintBorder.style = Paint.Style.STROKE
-            canvas.drawCircle(radius, radius, radius - borderWidth / 2, paintBorder)
+        if (attrs != null) {
+            val a = context.obtainStyledAttributes(attrs, R.styleable.CircleImageView)
+            borderWidth = a.getDimension(R.styleable.CircleImageView_cv_borderWidth, borderWidth)
+            borderColor = a.getColor(R.styleable.CircleImageView_cv_borderColor, borderColor)
+            a.recycle()
         }
     }
 
-    fun getBorderWidth(): Int = borderWidth.toInt().toDp()
 
-    fun setBorderWidth(widthInDp: Int) {
-        borderWidth = widthInDp.toFloat().dp
-        invalidate()
+    override fun getScaleType(): ScaleType =
+        super.getScaleType().let { if (it == null || it != CENTER_INSIDE) CENTER_CROP else it }
+
+    override fun setScaleType(scaleType: ScaleType) {
+        if (scaleType != CENTER_CROP && scaleType != CENTER_INSIDE) {
+            throw IllegalArgumentException(
+                String.format(
+                    "ScaleType %s not supported. " + "Just ScaleType.CENTER_CROP & ScaleType.CENTER_INSIDE are available for this library.",
+                    scaleType
+                )
+            )
+        } else {
+            super.setScaleType(scaleType)
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        loadBitmap()
+
+        if (mbitmap == null) return
+
+        val circleCenterWithBorder = circleCenter + borderWidth
+
+        canvas.drawCircle(
+            circleCenterWithBorder,
+            circleCenterWithBorder,
+            circleCenterWithBorder,
+            paintBorder
+        )
+        canvas.drawCircle(circleCenterWithBorder, circleCenterWithBorder, circleCenter, paint)
+    }
+
+    fun getBorderWidth(): Int = (borderWidth / resources.displayMetrics.density).roundToInt()
+
+    fun setBorderWidth(dp: Int) {
+        borderWidth = dp * resources.displayMetrics.density
     }
 
     fun setBorderColor(hex: String) {
         borderColor = Color.parseColor(hex)
-        invalidate()
     }
 
     fun getBorderColor(): Int = borderColor
 
     fun setBorderColor(@ColorRes colorId: Int) {
         borderColor = ContextCompat.getColor(context, colorId)
+    }
+
+    private fun update() {
+        if (mbitmap != null)
+            updateShader()
+
+        val usableWidth = width - (paddingLeft + paddingRight)
+        val usableHeight = height - (paddingTop + paddingBottom)
+
+        heightCircle = min(usableWidth, usableHeight)
+
+        circleCenter = (heightCircle - borderWidth * 2) / 2
+        paintBorder.color = borderColor
+
         invalidate()
     }
 
-    private fun drawableToBitmap(drawable: Drawable?): Bitmap? = when (drawable) {
-        null -> null
-        is BitmapDrawable -> drawable.bitmap
-        else -> {
-            val bitmap = Bitmap.createBitmap(
-                drawable.intrinsicWidth,
-                drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
-            bitmap
+    private fun loadBitmap() {
+        mbitmap = drawableToBitmap(drawable)
+        updateShader()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        update()
+    }
+
+    private fun updateShader() {
+        mbitmap?.also {
+            val shader = BitmapShader(it, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+
+            val scale: Float
+            val dx: Float
+            val dy: Float
+
+            when (scaleType) {
+                CENTER_CROP -> if (it.width * height > width * it.height) {
+                    scale = height / it.height.toFloat()
+                    dx = (width - it.width * scale) * 0.5f
+                    dy = 0f
+                } else {
+                    scale = width / it.width.toFloat()
+                    dx = 0f
+                    dy = (height - it.height * scale) * 0.5f
+                }
+                CENTER_INSIDE -> if (it.width * height < width * it.height) {
+                    scale = height / it.height.toFloat()
+                    dx = (width - it.width * scale) * 0.5f
+                    dy = 0f
+                } else {
+                    scale = width / it.width.toFloat()
+                    dx = 0f
+                    dy = (height - it.height * scale) * 0.5f
+                }
+                else -> {
+                    scale = 0f
+                    dx = 0f
+                    dy = 0f
+                }
+            }
+
+            shader.setLocalMatrix(Matrix().apply {
+                setScale(scale, scale)
+                postTranslate(dx, dy)
+            })
+
+            paint.shader = shader
         }
     }
+
+    private fun drawableToBitmap(drawable: Drawable?): Bitmap? =
+        when (drawable) {
+            null -> null
+            is BitmapDrawable -> drawable.bitmap
+            else -> try {
+                // Create Bitmap object out of the drawable
+                val bitmap = Bitmap.createBitmap(
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+                )
+                val canvas = Canvas(bitmap)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+                bitmap
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
 }
-
-fun Int.toDp(): Int = (this / Resources.getSystem().displayMetrics.density + 0.5f).toInt()
-
-val Float.dp
-    get() = this * Resources.getSystem().displayMetrics.density
