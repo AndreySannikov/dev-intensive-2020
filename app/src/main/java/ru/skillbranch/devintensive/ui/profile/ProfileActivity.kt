@@ -134,7 +134,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateAvatar(profile: Profile){
         val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        iv_avatar.setImageBitmap(iv_avatar.drawDefaultAvatar(initials!!))
+        iv_avatar.setInitials(initials!!)
     }
 
     private fun saveProfileInfo() {
