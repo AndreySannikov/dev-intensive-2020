@@ -30,7 +30,7 @@ data class Chat(
         is TextMessage -> (lastMessage.text
             ?: "Сообщений пока что нет") to lastMessage.from.firstName
         is ImageMessage -> ("${lastMessage.from.firstName} - отправил фото") to lastMessage.from.firstName
-        else -> "Сообщений пока что нет" to null
+        else -> noMessages
     }
 
     private fun isSingle(): Boolean = members.size == 1
@@ -67,21 +67,23 @@ data class Chat(
     }
 
     companion object {
+        private val noMessages = "Сообщений пока что нет" to null
+
         fun toArchiveChatItem(archiveChats: List<Chat>): ChatItem {
             val chatsWithMessages = archiveChats.filter { it.messages.isNotEmpty() }
             val chatWithLastMessage = chatsWithMessages.maxBy { it.lastMessageDate()!! }
-            val t = chatWithLastMessage?.lastMessageShort()
+            val t = chatWithLastMessage?.lastMessageShort() ?: noMessages
 
             return ChatItem(
                 CacheManager.nextChatId(),
                 null,
                 "",
                 App.applicationContext().getString(R.string.archive_chats_title),
-                t?.first,
+                t.first,
                 chatsWithMessages.sumBy { it.unreadableMessageCount() },
                 chatWithLastMessage?.lastMessageDate()?.shortFormat(),
                 chatType = ChatType.ARCHIVE,
-                author = t?.second
+                author = t.second?.let { "@$it" }
             )
         }
     }
