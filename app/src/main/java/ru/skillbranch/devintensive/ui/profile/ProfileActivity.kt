@@ -103,7 +103,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun updateTheme(mode: Int) {
         Log.d("M_ProfileActivity", "updateTheme")
-        delegate.localNightMode = mode
+//        delegate.localNightMode = mode
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
